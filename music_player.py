@@ -13,7 +13,7 @@ simply the name of the song you want to play ↓
     """)
 
 
-def playsong(name):#give name of the song to play it
+def playsong(name):  # give name of the song to play it
     flag = True
     name = name + " official music video youtube"
     query = ''
@@ -22,9 +22,9 @@ def playsong(name):#give name of the song to play it
         query = query + ' ' + a
     for urls in search(query, tld="co.in", num=10, stop=1, pause=2):
         print(urls)
+    webbrowser.open_new_tab(urls)
     videod = pafy.new(urls)
     print("playing -> " + videod.title)
-    webbrowser.open_new_tab(urls)
     ab = open('history.txt', 'a+')
     abd = ab.readlines()
     for i in abd:
@@ -60,7 +60,7 @@ while True:
             for a in name:
                 query = query + ' ' + a
             for urls in search(query, tld="co.in", num=10, stop=1, pause=2):
-                    print(urls)
+                print(urls)
             videod = pafy.new(urls)
             f.write('\n' + videod.title)
             f.close()
@@ -112,11 +112,14 @@ while True:
         else:
             playsong(num)
 
-    elif search_keyword == '@rec':
+    elif search_keyword.lower().strip() == '@his':
         with open('history.txt', 'r') as s:
             print(s.read())
-            print("****press 'n' to play recent song***")
-
-
+            # print("****press 'n' to play recent song***")
+            hist_command = input("->enter 'del' to delete history or just hit enter: ")
+            if hist_command.lower().strip() == 'del':
+                hist_text = open("history.txt", 'w')
+                hist_text.close()
+                print("***history deleted***")
     else:
         playsong(search_keyword)
