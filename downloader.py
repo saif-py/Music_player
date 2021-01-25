@@ -1,5 +1,3 @@
-import webbrowser
-import random
 import pafy
 from googlesearch import search
 import tkinter as tk

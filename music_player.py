@@ -8,6 +8,7 @@ enter'@ny'(any) for random song
 '@dd' to add a new song in the library 
 '@list' to see the playlist or
 '@his' to see the history of played song 
+'@down' to download a song
 simply the name of the song you want to play ↓
     
     """)
@@ -59,8 +60,10 @@ while True:
             name = name.split()
             for a in name:
                 query = query + ' ' + a
-            for urls in search(query, tld="co.in", num=10, stop=1, pause=2):
-                print(urls)
+            for urls in search(query, tld="co.in", num=10, stop=10, pause=2):
+                if urls.__contains__("www.youtube.com"):
+                    print(urls)
+                    break
             videod = pafy.new(urls)
             f.write('\n' + videod.title)
             f.close()
@@ -116,10 +119,13 @@ while True:
         with open('history.txt', 'r') as s:
             print(s.read())
             # print("****press 'n' to play recent song***")
-            hist_command = input("->enter 'del' to delete history or just hit enter: ")
+            hist_command = input("->enter 'del' to delete history or just hit enter:         ")
             if hist_command.lower().strip() == 'del':
                 hist_text = open("history.txt", 'w')
                 hist_text.close()
                 print("***history deleted***")
+    elif search_keyword.lower().strip() == '@down':
+        import downloader
+
     else:
         playsong(search_keyword)
