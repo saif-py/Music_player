@@ -8,6 +8,7 @@ enter'@ny'(any) for random song
 '@dd' to add a new song in the library 
 '@list' to see the playlist or
 '@his' to see the history of played song 
+'@down' to download a song
 simply the name of the song you want to play ↓
     
     """)
