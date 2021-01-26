@@ -121,5 +121,8 @@ while True:
                 hist_text = open("history.txt", 'w')
                 hist_text.close()
                 print("***history deleted***")
+    elif search_keyword.lower().strip() == '@down':
+        import downloader
+        
     else:
         playsong(search_keyword)
