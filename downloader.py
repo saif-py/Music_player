@@ -22,9 +22,16 @@ def mycb(total, recvd, ratio, rate, eta):
     total = "{:.2f}".format(total)
     recvd = "{:.2f}".format(recvd)
     rate = "{:.2f}".format(rate)
+    time_remaining = 'sec'
+    if int(eta) >= 60:
+        eta = int(eta) / 60
+        time_remaining = 'min'
+        eta = "{:.1f}".format(eta)
+    else:
+        time_remaining = 'sec'
 
     sys.stdout.write(f"\rtotal = {total}")
-    sys.stdout.write(f"\rtotal : {total}MB   recived : {recvd}MB  ETA : {eta}sec  speed : {rate}kbps")
+    sys.stdout.write(f"\rtotal : {total}MB  recived : {recvd}MB  ETA : {eta}{time_remaining}  speed : {rate}kbps")
 
 
 song = input("enter the name of the song:-> ")
@@ -49,8 +56,9 @@ for i in video.streams:
         n = 0
     bi = tk.Button(wd, text=i, command=lambda i=i: button_c(i)).grid(row=ro, column=n)
     n += 1
-best = video.getbestvideo()
-b2 = tk.Button(wd, text=best, command=lambda best=i: button_c(i)).grid(row=ro, column=n)
+best = video.getbest()
+# getbestnl=video.getbest
+b2 = tk.Button(wd, text=best, command=lambda best=best: button_c(best)).grid(row=ro, column=n)
 n += 1
 for i in video.audiostreams:
     if n > 5:

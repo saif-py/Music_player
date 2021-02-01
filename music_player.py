@@ -16,7 +16,7 @@ simply the name of the song you want to play ↓
 
 def playsong(name):  # give name of the song to play it
     flag = True
-    name = name + " official music video youtube"
+    name = name + "song (official video) youtube"
     query = ''
     name = name.split()
     for a in name:
