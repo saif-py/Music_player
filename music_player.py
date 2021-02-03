@@ -9,6 +9,7 @@ enter'@ny'(any) for random song
 '@list' to see the playlist or
 '@his' to see the history of played song 
 '@down' to download a song
+'/q' to exit
 simply the name of the song you want to play ↓
     
     """)
@@ -16,11 +17,12 @@ simply the name of the song you want to play ↓
 
 def playsong(name):  # give name of the song to play it
     flag = True
-    name = name + "song (official video) youtube"
+    name = name + " song (official video) youtube"
     query = ''
     name = name.split()
     for a in name:
         query = query + ' ' + a
+    print(query)
     for urls in search(query, tld="co.in", num=10, stop=1, pause=2):
         print(urls)
     webbrowser.open_new_tab(urls)
@@ -126,6 +128,7 @@ while True:
                 print("***history deleted***")
     elif search_keyword.lower().strip() == '@down':
         import downloader
-
+    elif search_keyword.lower().strip()=="/q":
+        quit()
     else:
         playsong(search_keyword)
