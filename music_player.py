@@ -11,8 +11,7 @@ enter'@ny'(any) for random song
 '@down' to download a song
 '/q' to exit
 simply the name of the song you want to play ↓
-    
-    """)
+""")
 
 
 def playsong(name):  # give name of the song to play it
@@ -24,7 +23,9 @@ def playsong(name):  # give name of the song to play it
         query = query + ' ' + a
     print(query)
     for urls in search(query, tld="co.in", num=10, stop=1, pause=2):
-        print(urls)
+        if urls.__contains__("www.youtube.com"):
+            print(urls)
+            break
     webbrowser.open_new_tab(urls)
     videod = pafy.new(urls)
     print("playing -> " + videod.title)
@@ -35,11 +36,9 @@ def playsong(name):  # give name of the song to play it
             flag = False
         if flag:
             ab.write(videod.title)
-    ab.close()
-    if flag:
-        with open("history.txt", "a") as f:
-            f.write('\n' + videod.title)
-            f.close()
+            flag= False
+        ab.close()
+
 
 
 while True:
@@ -128,7 +127,7 @@ while True:
                 print("***history deleted***")
     elif search_keyword.lower().strip() == '@down':
         import downloader
-    elif search_keyword.lower().strip()=="/q":
+    elif search_keyword.lower().strip() == "/q":
         quit()
     else:
         playsong(search_keyword)
