@@ -36,9 +36,8 @@ def playsong(name):  # give name of the song to play it
             flag = False
         if flag:
             ab.write(videod.title)
-            flag= False
+            flag = False
         ab.close()
-
 
 
 while True:
