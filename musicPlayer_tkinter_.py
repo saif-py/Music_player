@@ -6,7 +6,6 @@ import pafy
 from tkinter import ttk
 from tkinter import messagebox
 import random
-import socket
 
 try:
 
@@ -38,17 +37,13 @@ try:
     my_canvas.create_window((0, 0), window=second_frame, anchor="nw")
 
 
-    # backg.place(x=0, y=0, relwidth=1, relheight=1)
-
     def _on_mouse_wheel(event):
         my_canvas.yview_scroll(-1 * int((event.delta / 120)), "units")
 
 
-    # import pygame
     def buttonPress():
         a = e1.get()
-        e1.delete(1)
-        # print(a)
+        e1.delete(0)
         Playsong(a)
 
 
@@ -56,10 +51,6 @@ try:
         a = e1.get()
         e1.delete(1)
         Playsong(a)
-
-
-    def calll():
-        buttonPress()
 
 
     def clear_text(self):
@@ -97,38 +88,65 @@ try:
         Playsong(name)
 
 
-    def song_name(e2):
-        search_word = e2.get
+    def song_name(search_word):
         flag = True
         name = search_word + " song (official video) youtube"
-        query = ''
-        name = name.split()
-        for a in name:
-            query = query + ' ' + a
-        print(query)
-        for urls in search(query, tld="co.in", num=10, stop=1, pause=2):
+        for urls in search(name, tld="co.in", num=10, stop=1, pause=2):
             if urls.__contains__("www.youtube.com"):
                 print(urls)
                 break
         videod = pafy.new(urls)
         addd = tk.messagebox.askokcancel(title=None, message=f'add:- "{videod.title}" ?')
         if addd:
+            with open('ex.txt', 'a') as f:
+                f.write(f'\n{videod.title}')
             playy = tk.messagebox.askokcancel(title=None, message=f'play:- "{videod.title}" ?')
             if playy:
                 webbrowser.open_new_tab(urls)
 
 
-    # def search_song(e2):
-    #     e22 = e2.get()
-    #     song_name(e22)
-
     def add_song():
-        e2 = tk.Entry(second_frame).grid(row=1, column=4)
-        searchsong = partial(song_name, e2)
-        bb4 = tk.Button(second_frame, text='add', command=searchsong).grid(row=1, column=5)
+
+        ent = tk.Entry(second_frame)
+        ent.grid(row=1, column=4)
+
+        # searchsong = partial(song_name, e2)
+        def songg():
+            search_word = ent.get()
+            song_name(search_word)
+
+        bb4 = tk.Button(second_frame, text='add', command=songg).grid(row=1, column=5)
+        root.geometry('900x400')
+
+
+    def deel(ab):
+
+        with open("ex.txt", "r") as f:
+            liness = f.readlines()
+        with open("ex.txt", "w") as f:
+            for i in liness:
+                if i != ab:
+                    f.write(i)
+                else:
+                    tk.messagebox.showinfo(title='song deleted', message=f'{ab} \n deleted from the playlist')
+
+
+    def editt():
+        with open("ex.txt", "r") as f:
+            liness = f.readlines()
+        i = 2
+        col = 3
+        for ab in liness:
+            i += 1
+            delete = partial(deel, ab)
+            buttonn= tk.Button(second_frame, text=f'<delete> {ab}', command=delete)
+            buttonn.grid(row=i, column=col, columnspan=4)
 
 
     def play_list():
+        butt = tk.PhotoImage(file=r"button.png")
+        # butt = butt.subsample(1, 1)
+
         root.geometry('800x400')
         with open("ex.txt", "r") as f:
             liness = f.readlines()
@@ -137,11 +155,14 @@ try:
 
         add = tk.Button(second_frame, text="add a song", command=add_song)
         add.grid(row=1, column=3)
+        # edit = tk.Button(second_frame, image=butt)
+        edit = tk.Button(second_frame, text='edit', command=editt)
+        edit.grid(row=2, column=3, rowspan=2)
         for ab in liness:
             i += 1
             playy = partial(sonf, ab)
             buttonn = tk.Button(second_frame, text=ab, command=playy)
-            buttonn.grid(row=i, column=col, columnspan=3)
+            buttonn.grid(row=i, column=col, columnspan=4)
 
 
     def downloader():
@@ -156,7 +177,6 @@ try:
                 Playsong(name=line)
 
 
-    # backg = tk.Label(second_frame, image=bg_image).grid(row=1, column=0)
     label1 = tk.Label(second_frame, image=bg_image)
     label1.place(x=0, y=0)
     ab = tk.Label(second_frame, text=' ').grid(row=4, column=1)
@@ -165,7 +185,7 @@ try:
     tk.Label(second_frame, text="enter the name of the song or").grid(row=3, column=0, columnspan=2)
     e1 = tk.Entry(second_frame)
     e1.grid(row=4, column=0, columnspan=2)
-    b1 = tk.Button(second_frame, text="command", command=calll)
+    b1 = tk.Button(second_frame, text="play", command=buttonPress)
     b1.grid(row=5, column=0, columnspan=2)
     bb2 = tk.Button(second_frame, text='download', command=downloader)
     bb3 = tk.Button(second_frame, text='random', command=random)
@@ -177,5 +197,7 @@ try:
     root.bind('<Return>', callback)
 
     root.mainloop()
+
+
 except:
     tk.messagebox.showerror(title='error', message='check your internet connection')
