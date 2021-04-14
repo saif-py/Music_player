@@ -8,7 +8,8 @@ from tkinter import messagebox
 import random
 import sys
 import os
-from playsound import playsound
+from pynput import keyboard
+import vlc
 
 try:
 
@@ -173,10 +174,29 @@ try:
         columnnm = 1
 
         def playsong_offline(name):
+            pfile = vlc.MediaPlayer(name)
             playing_song = tk.Toplevel(root)
             playing_song.title('playing...')
-            playsound(f"/home/saif/PycharmProjects/music_player/downloads/{name}")
-            tk.Label(playing_song, text=name)
+            tk.Label(playing_song, text=name).grid(row=1, column=0)
+            pfile.play()
+
+            def on_press(key):
+                flag = True
+                print(format(key))
+                if not flag:
+                    if format(key) == 'Key.space':
+                        pfile.play()
+                        print("play")
+                        flag = True
+                if flag:
+                    if format(key) == 'Key.space':
+                        print('pause')
+                        pfile.pause()
+                        flag = False
+
+            with keyboard.Listener(on_press=on_press) as listener:
+                listener.join()
+            # print('hey')
 
         for i in os.listdir():
             print(i)
