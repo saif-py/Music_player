@@ -7,6 +7,8 @@ from tkinter import ttk
 from tkinter import messagebox
 import random
 import sys
+import os
+from playsound import playsound
 
 try:
 
@@ -53,10 +55,6 @@ try:
         a = e1.get()
         e1.delete(0, 100)
         Playsong(a)
-
-
-    def clear_text(self):
-        self.e1.delete(0, 100)
 
 
     def Playsong(name):
@@ -146,9 +144,7 @@ try:
 
 
     def play_list():
-        butt = tk.PhotoImage(file=r"button.png")
-        # butt = butt.subsample(1, 1)
-        root.geometry()
+        root.geometry('850x200')
         # root.geometry('800x400')
         with open("ex.txt", "r") as f:
             liness = f.readlines()
@@ -169,9 +165,26 @@ try:
 
 
     def downloader():
+        os.chdir(r"/home/saif/PycharmProjects/music_player/downloads")
         downloading_window = tk.Toplevel(root)
         entry1 = tk.Entry(downloading_window)
         entry1.grid(row=0, column=4)
+        roww = 3
+        columnnm = 1
+
+        def playsong_offline(name):
+            playing_song = tk.Toplevel(root)
+            playing_song.title('playing...')
+            playsound(f"/home/saif/PycharmProjects/music_player/downloads/{name}")
+            tk.Label(playing_song, text=name)
+
+        for i in os.listdir():
+            print(i)
+            if i.endswith('.mp3') or i.endswith(".webm"):
+                print(i)
+                bbb = tk.Button(downloading_window, text=f"{i}", command=lambda i=i: playsong_offline(i))
+                bbb.grid(row=roww, column=columnnm, columnspan=6)
+                roww += 1
 
         def button_c(i):
             print(i)
