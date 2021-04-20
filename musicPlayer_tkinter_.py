@@ -8,8 +8,12 @@ from tkinter import messagebox
 import random
 import sys
 import os
+import requests
+import shutil
 from pynput import keyboard
 import vlc
+from threading import *
+from PIL import Image, ImageTk
 
 try:
 
@@ -175,42 +179,58 @@ try:
 
         def playsong_offline(name):
             pfile = vlc.MediaPlayer(name)
-            playing_song = tk.Toplevel(root)
-            playing_song.title('playing...')
-            tk.Label(playing_song, text=name).grid(row=1, column=0)
-            pfile.play()
 
-            def on_press(key):
-                flag = True
-                print(format(key))
-                if not flag:
-                    if format(key) == 'Key.space':
-                        pfile.play()
-                        print("play")
-                        flag = True
-                if flag:
-                    if format(key) == 'Key.space':
-                        print('pause')
-                        pfile.pause()
-                        flag = False
+            class Playing(Thread):
+                def run(self):
+                    pfile.play()
 
-            with keyboard.Listener(on_press=on_press) as listener:
-                listener.join()
-            # print('hey')
+            class Player(Thread):
+                def run(self):
+                    new = tk.Toplevel()
+                    txtt = tk.Label(new, text=name).grid(row=0, column=3, columnspan=3)
+                    playbt = tk.Button(new, text="play", command=lambda: pfile.play())
+                    playbt.grid(row=2, column=2)
+                    pausebt = tk.Button(new, text="pause", command=lambda: pfile.pause())
+                    pausebt.grid(row=2, column=3)
+                    test = tk.PhotoImage(f'{name.replace(".webm", "")}(bgthumb)')
+                    label1 = tk.Label(new, image=test).grid(row=1)
+                    print(name)
+
+            playings = Playing()
+            players = Player()
+            playings.start()
+            players.start()
 
         for i in os.listdir():
             print(i)
-            if i.endswith('.mp3') or i.endswith(".webm"):
+            if i.endswith('.mp3') or i.endswith(".webm") or i.endswith('.m4a'):
                 print(i)
-                bbb = tk.Button(downloading_window, text=f"{i}", command=lambda i=i: playsong_offline(i))
+                the_one = partial(playsong_offline, i)
+                bbb = tk.Button(downloading_window, text=i, command=the_one)
                 bbb.grid(row=roww, column=columnnm, columnspan=6)
                 roww += 1
 
-        def button_c(i):
+        def button_c(i, image_url, name):
             print(i)
             print("downloading.....")
             i.download(quiet=False, callback=mycb)
             print("download completed")
+            # response = requests.get(thumbnail)
+            # dow
+            # open(thumbnail)
+            filename = name + '(bgthumb)'
+
+            # Open the url image, set stream to True, this will return the stream content.
+            r = requests.get(image_url, stream=True)
+
+            # Check if the image was retrieved successfully
+            if r.status_code == 200:
+                # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+                r.raw.decode_content = True
+
+                # Open a local file with wb ( write binary ) permission.
+                with open(filename, 'wb') as f:
+                    shutil.copyfileobj(r.raw, f)
 
         def mycb(total, recvd, ratio, rate, eta):
 
@@ -234,6 +254,8 @@ try:
                 f"\rtotal : {total}MB  recived : {recvd}MB  ETA : {eta}{time_remaining}  speed : {rate}kbps")
 
         def get_song(search_word):
+            downloading_options = tk.Toplevel(root)
+
             print(search_word)
             name = search_word + " song (official video) youtube"
             for urls in search(name, tld="co.in", num=10, stop=1, pause=2):
@@ -241,14 +263,17 @@ try:
                     print(urls)
                     break
             video = pafy.new(urls)
-            tk.Label(downloading_window, text=f"{video.title}").grid(row=1, column=2, columnspan=2)
+            image_url = video.bigthumbhd
+            title = video.title
+            tk.Label(downloading_options, text=f"{video.title}").grid(row=1, column=2, columnspan=2)
             n = 1
             ro = 3
             for i in video.streams:
                 if n > 5:
                     ro += 1
                     n = 0
-                bi = tk.Button(downloading_window, text=i, command=lambda i=i: button_c(i)).grid(row=ro, column=n)
+                bi = tk.Button(downloading_options, text=i, command=lambda i=i: button_c(i, image_url)).grid(row=ro,
+                                                                                                             column=n)
                 n += 1
             n = 0
             ro += 1
@@ -257,7 +282,8 @@ try:
                 if n > 5:
                     ro += 1
                     n = 0
-                bi = tk.Button(downloading_window, text=i, command=lambda i=i: button_c(i)).grid(row=ro, column=n)
+                bi = tk.Button(downloading_options, text=i, command=lambda i=i: button_c(i, image_url, title)).grid(
+                    row=ro, column=n)
                 n += 1
 
         def songsss():
