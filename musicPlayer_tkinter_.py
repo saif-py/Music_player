@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 import webbrowser
 from functools import partial
@@ -14,6 +15,8 @@ from pynput import keyboard
 import vlc
 from threading import *
 from PIL import Image, ImageTk
+
+os.chdir(r"/home/saif/PycharmProjects/music_player/downloads")
 
 try:
 
@@ -178,6 +181,7 @@ try:
         columnnm = 1
 
         def playsong_offline(name):
+            new = tk.Toplevel()
             pfile = vlc.MediaPlayer(name)
 
             class Playing(Thread):
@@ -186,15 +190,32 @@ try:
 
             class Player(Thread):
                 def run(self):
-                    new = tk.Toplevel()
-                    txtt = tk.Label(new, text=name).grid(row=0, column=3, columnspan=3)
-                    playbt = tk.Button(new, text="play", command=lambda: pfile.play())
-                    playbt.grid(row=2, column=2)
-                    pausebt = tk.Button(new, text="pause", command=lambda: pfile.pause())
-                    pausebt.grid(row=2, column=3)
-                    test = tk.PhotoImage(f'{name.replace(".webm", "")}(bgthumb)')
-                    label1 = tk.Label(new, image=test).grid(row=1)
-                    print(name)
+                    play_img = tk.PhotoImage(file='/home/saif/PycharmProjects/music_player/downloads/buttons/play.png')
+                    pause_img = tk.PhotoImage(
+                        file='/home/saif/PycharmProjects/music_player/downloads/buttons/pause.png')
+                    txtt = tk.Label(new, text=name).grid(row=0, column=0, columnspan=3)
+                    playbt = tk.Button(new, text='play', image=play_img, command=lambda: pfile.play())
+                    playbt.grid(row=2, column=0)
+                    pausebt = tk.Button(new, text='pause', image=pause_img, command=lambda: pfile.pause())
+                    pausebt.grid(row=2, column=1)
+                    # test = tk.PhotoImage(file=f'{name.replace(".webm", "")}(bgthumb)')
+                    try:
+                        img = ImageTk.PhotoImage(
+                            Image.open(f'{name.replace(".webm", "")}(bgthumb).JPEG'))
+                    except:
+                        img = ImageTk.PhotoImage(Image.open('sample.png'))
+
+                    label1 = tk.Label(new,image=img)
+                    label1.grid(row=1, column=0, columnspan=3)
+                    print(f'{name.replace(".webm", "")}(bgthumb).JPEG')
+
+                    def on_closing():
+                        pfile.play()
+                        time.sleep(0.1)
+                        pfile.pause()
+                        new.destroy()
+
+                    new.protocol("WM_DELETE_WINDOW", on_closing)
 
             playings = Playing()
             players = Player()
@@ -215,26 +236,16 @@ try:
             print("downloading.....")
             i.download(quiet=False, callback=mycb)
             print("download completed")
-            # response = requests.get(thumbnail)
-            # dow
-            # open(thumbnail)
-            filename = name + '(bgthumb)'
-
-            # Open the url image, set stream to True, this will return the stream content.
+            filename = name + '(bgthumb).JPEG'
             r = requests.get(image_url, stream=True)
 
-            # Check if the image was retrieved successfully
             if r.status_code == 200:
-                # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
                 r.raw.decode_content = True
-
-                # Open a local file with wb ( write binary ) permission.
                 with open(filename, 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
 
         def mycb(total, recvd, ratio, rate, eta):
 
-            # global n, ro
             sys.stdout.flush()
             total = int(total) / 1000000
             recvd = int(recvd) / 1000000
@@ -329,5 +340,5 @@ try:
     root.mainloop()
 
 
-except:
+except NameError:
     tk.messagebox.showerror(title='error', message='check your internet connection')
