@@ -11,13 +11,12 @@ import sys
 import os
 import requests
 import shutil
-from pynput import keyboard
 import vlc
 from threading import *
 from PIL import Image, ImageTk
 
 os.chdir(r"/home/saif/PycharmProjects/music_player/downloads")
-
+number_windows = 0
 try:
 
     root = tk.Tk()
@@ -136,7 +135,8 @@ try:
                 if i != ab:
                     f.write(i)
                 else:
-                    tk.messagebox.showinfo(title='song deleted', message=f'{ab} \n deleted from the playlist')
+                    tk.messagebox.showinfo(title='song deleted',
+                                           message=f'{ab.split("|-><-|")[0]} \n deleted from the playlist')
 
 
     def editt():
@@ -144,14 +144,18 @@ try:
             liness = f.readlines()
         i = 2
         col = 3
-        for ab in liness:
+        for a in liness:
             i += 1
-            delete = partial(deel, ab)
-            buttonn = tk.Button(second_frame, text=f'<delete> {ab}', command=delete)
-            buttonn.grid(row=i, column=col, columnspan=4)
+            ab = a.split("|-><-|")
+
+            delete = partial(deel, a)
+            # buttonn = tk.Button(second_frame, text=f'<delete> {ab[0]}', command=delete)
+            # buttonn.grid(row=i, column=col, columnspan=4)
+            buttonn.config(text=f'<delete> {ab[0]}', command=delete)
 
 
     def play_list():
+        global buttonn
         root.geometry('850x200')
         # root.geometry('800x400')
         with open("ex.txt", "r") as f:
@@ -162,13 +166,14 @@ try:
         add.grid(row=1, column=3)
         # edit = tk.Button(second_frame, image=butt)
         edit = tk.Button(second_frame, text='edit', command=editt)
-        edit.grid(row=2, column=3, rowspan=2)
+        edit.grid(row=2, column=6)
         for a in liness:
             ab = a.split("|-><-|")
             i += 1
             url = str(ab[1]).strip()
             playy = partial(sonf, url)
-            buttonn = tk.Button(second_frame, text=ab[0], command=playy)
+            buttonn = tk.Button(second_frame)
+            buttonn.config(text=ab[0], command=playy)
             buttonn.grid(row=i, column=col, columnspan=4)
 
 
@@ -181,32 +186,77 @@ try:
         columnnm = 1
 
         def playsong_offline(name):
+            global number_windows
+            global new, pfile
+            if number_windows > 0:
+                new.destroy()
+                pfile.play()
+                time.sleep(0.1)
+                pfile.pause()
+                number_windows = 0
             new = tk.Toplevel()
-            pfile = vlc.MediaPlayer(name)
+            number_windows += 1
+            pfile = vlc.MediaPlayer()
+            media = vlc.Media(name)
+            pfile.set_media(media)
+
+            pfile.audio_set_volume(80)
+            value = pfile.get_length()
+
+            # print(pfile.get_duration())
+            # print("Length of the media : ")
+            # print(value)
 
             class Playing(Thread):
                 def run(self):
+                    def music_vol(v):
+                        pfile.audio_set_volume(int(v))
+
                     pfile.play()
+                    slider = tk.Scale(new, from_=0, to=200, orient=tk.HORIZONTAL, command=music_vol)
+                    slider.grid(row=2, column=3)
+                    slider.set(80)
+
+                    # def seek(v):
+                    #     value = pfile.get_time()
+                    #     print(value)
+                    # print(pfile.get_length())
+                    #
+                    # seek_track = tk.Scale(new, label='try me', from_=0, to=100, orient=tk.HORIZONTAL,
+                    #                       length=1000,
+                    #                       tickinterval=10,
+                    #                       resolution=0.01, command=seek)
+                    # seek_track.grid(row=3, columnspan=3)
 
             class Player(Thread):
                 def run(self):
                     play_img = tk.PhotoImage(file='/home/saif/PycharmProjects/music_player/downloads/buttons/play.png')
                     pause_img = tk.PhotoImage(
                         file='/home/saif/PycharmProjects/music_player/downloads/buttons/pause.png')
-                    txtt = tk.Label(new, text=name).grid(row=0, column=0, columnspan=3)
-                    playbt = tk.Button(new, text='play', image=play_img, command=lambda: pfile.play())
+                    next_img = tk.PhotoImage(file='/home/saif/PycharmProjects/music_player/downloads/buttons/next.png')
+                    txtt = tk.Label(new, text=name).grid(row=0, column=0, columnspan=4)
+                    playbt = tk.Button(new, text='play', command=lambda: pfile.play())
+                    playbt.config(image=play_img)
+                    playbt.image = play_img
                     playbt.grid(row=2, column=0)
-                    pausebt = tk.Button(new, text='pause', image=pause_img, command=lambda: pfile.pause())
+                    pausebt = tk.Button(new, text='pause', command=lambda: pfile.pause())
+                    pausebt.config(image=pause_img)
+                    pausebt.image = pause_img
                     pausebt.grid(row=2, column=1)
-                    # test = tk.PhotoImage(file=f'{name.replace(".webm", "")}(bgthumb)')
+                    nextbt = tk.Button(new, text='pause', command=lambda: pfile.pause())
+                    nextbt.config(image=next_img)
+                    nextbt.image = next_img
+                    nextbt.grid(row=2, column=2)
                     try:
                         img = ImageTk.PhotoImage(
                             Image.open(f'{name.replace(".webm", "")}(bgthumb).JPEG'))
                     except:
                         img = ImageTk.PhotoImage(Image.open('sample.png'))
 
-                    label1 = tk.Label(new,image=img)
-                    label1.grid(row=1, column=0, columnspan=3)
+                    label1 = tk.Label(new)
+                    label1.config(image=img)
+                    label1.image = img
+                    label1.grid(row=1, column=0, columnspan=4)
                     print(f'{name.replace(".webm", "")}(bgthumb).JPEG')
 
                     def on_closing():
@@ -340,5 +390,5 @@ try:
     root.mainloop()
 
 
-except NameError:
+except:
     tk.messagebox.showerror(title='error', message='check your internet connection')
