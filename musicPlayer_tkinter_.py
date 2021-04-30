@@ -217,19 +217,19 @@ try:
                     slider.grid(row=2, column=3)
                     slider.set(80)
 
-                    # def seek(v):
-                    #     value = pfile.get_time()
-                    #     print(value)
-                    # print(pfile.get_length())
-                    #
-                    # seek_track = tk.Scale(new, label='try me', from_=0, to=100, orient=tk.HORIZONTAL,
-                    #                       length=1000,
-                    #                       tickinterval=10,
-                    #                       resolution=0.01, command=seek)
-                    # seek_track.grid(row=3, columnspan=3)
-
             class Player(Thread):
                 def run(self):
+                    def next_song():
+                        flag = False
+
+                        for i in os.listdir():
+                            if i.endswith('.mp3') or i.endswith(".webm") or i.endswith('.m4a'):
+                                if flag:
+                                    playsong_offline(i)
+                                    break
+                                if i == name:
+                                    flag = True
+
                     play_img = tk.PhotoImage(file='/home/saif/PycharmProjects/music_player/downloads/buttons/play.png')
                     pause_img = tk.PhotoImage(
                         file='/home/saif/PycharmProjects/music_player/downloads/buttons/pause.png')
@@ -243,7 +243,7 @@ try:
                     pausebt.config(image=pause_img)
                     pausebt.image = pause_img
                     pausebt.grid(row=2, column=1)
-                    nextbt = tk.Button(new, text='pause', command=lambda: pfile.pause())
+                    nextbt = tk.Button(new, text='pause', command=next_song)
                     nextbt.config(image=next_img)
                     nextbt.image = next_img
                     nextbt.grid(row=2, column=2)
@@ -258,6 +258,8 @@ try:
                     label1.image = img
                     label1.grid(row=1, column=0, columnspan=4)
                     print(f'{name.replace(".webm", "")}(bgthumb).JPEG')
+                    if not pfile.is_playing():
+                        next_song()
 
                     def on_closing():
                         pfile.play()
@@ -273,11 +275,13 @@ try:
             players.start()
 
         for i in os.listdir():
-            print(i)
             if i.endswith('.mp3') or i.endswith(".webm") or i.endswith('.m4a'):
-                print(i)
                 the_one = partial(playsong_offline, i)
-                bbb = tk.Button(downloading_window, text=i, command=the_one)
+                music_name = i.split('.')
+                music_fulll_name = " "
+                for i in music_name[:-1]:
+                    music_fulll_name = i + music_fulll_name
+                bbb = tk.Button(downloading_window, text=music_fulll_name, command=the_one)
                 bbb.grid(row=roww, column=columnnm, columnspan=6)
                 roww += 1
 
@@ -382,9 +386,7 @@ try:
     bb3 = tk.Button(second_frame, text='random', command=randomm)
     bb2.grid(row=1, column=1)
     bb3.grid(row=1, column=2)
-
     root.bind("<MouseWheel>", _on_mouse_wheel)
-
     root.bind('<Return>', callback)
 
     root.mainloop()
