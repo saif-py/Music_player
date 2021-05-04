@@ -79,7 +79,9 @@ try:
         videod = pafy.new(urls)
         playy = tk.messagebox.askokcancel(title=None, message=f'play:- "{videod.title} "?')
         if playy:
-            webbrowser.open_new_tab(urls)
+            link = str(urls)
+            webbrowser.open_new_tab(link.replace('www', 'music'))
+            print(link.replace('www', 'music'))
             ab = open('history.txt', 'a+')
             abd = ab.readlines()
             for i in abd:
@@ -92,7 +94,8 @@ try:
 
 
     def sonf(name):
-        webbrowser.open_new_tab(name)
+        link = str(name)
+        webbrowser.open_new_tab(link.replace('www', 'music'))
 
 
     def song_name(search_word):
@@ -226,15 +229,33 @@ try:
                             if i.endswith('.mp3') or i.endswith(".webm") or i.endswith('.m4a'):
                                 if flag:
                                     playsong_offline(i)
+                                    flag = False
                                     break
                                 if i == name:
                                     flag = True
+                        if flag:
+                            for i in os.listdir():
+                                if i.endswith('.mp3') or i.endswith(".webm") or i.endswith('.m4a'):
+                                    playsong_offline(i)
+                                    flag = False
+                                    break
+
+                    time.sleep(0.1)
+                    length_song = pfile.get_length()
+
+                    # print("Length of the media : ")
+                    # print(length_song)
+                    # current_time = pfile.get_time()
+                    # print(current_time)
 
                     play_img = tk.PhotoImage(file='/home/saif/PycharmProjects/music_player/downloads/buttons/play.png')
                     pause_img = tk.PhotoImage(
                         file='/home/saif/PycharmProjects/music_player/downloads/buttons/pause.png')
+
                     next_img = tk.PhotoImage(file='/home/saif/PycharmProjects/music_player/downloads/buttons/next.png')
-                    txtt = tk.Label(new, text=name).grid(row=0, column=0, columnspan=4)
+                    txtt = tk.Label(new, text=name.replace(name.split('.')[-1], ' ').replace('.', ' ')).grid(row=0,
+                                                                                                             column=0,
+                                                                                                             columnspan=4)
                     playbt = tk.Button(new, text='play', command=lambda: pfile.play())
                     playbt.config(image=play_img)
                     playbt.image = play_img
@@ -258,8 +279,6 @@ try:
                     label1.image = img
                     label1.grid(row=1, column=0, columnspan=4)
                     print(f'{name.replace(".webm", "")}(bgthumb).JPEG')
-                    if not pfile.is_playing():
-                        next_song()
 
                     def on_closing():
                         pfile.play()
@@ -267,6 +286,20 @@ try:
                         pfile.pause()
                         new.destroy()
 
+                    class Timing(Thread):
+                        def run(self):
+                            while True:
+                                if pfile.get_time() == length_song:
+                                    time.sleep(0.7)
+                                    next_song()
+                                    break
+                                elif length_song - pfile.get_time() < 200:
+                                    time.sleep(0.7)
+                                    next_song()
+                                    break
+
+                    timings = Timing()
+                    timings.start()
                     new.protocol("WM_DELETE_WINDOW", on_closing)
 
             playings = Playing()
